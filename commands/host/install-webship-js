@@ -1,0 +1,24 @@
+#!/bin/bash
+#ddev-generated
+
+mkdir -p test/webship-js
+if [ ! -f test/webship-js/package.json ]; then
+  echo "No webship-js installation exists at test/webship-js."
+  echo ""
+  echo "Run the following to set up webship-js with npm:"
+  echo "  mkdir -p test/webship-js && cd test/webship-js && npm init -y && npm install webship-js"
+  echo ""
+  echo "Or copy the example configuration:"
+  echo "  ddev exec -d /var/www/html 'mkdir -p test/webship-js'"
+  echo ""
+  echo "See https://webship.co/docs/webship-js/2.0.x for more details."
+  echo ""
+  echo "When done, run: ddev install-webship-js"
+  exit 1
+fi
+
+# ddev errors out on subsequent builds if we symlink these files. Instead, we
+# copy them each time.
+echo "Rebuilding web service with webship-js dependencies..."
+cp .ddev/web-build/disabled.Dockerfile.webship-js .ddev/web-build/Dockerfile.webship-js
+ddev restart

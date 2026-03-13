@@ -1,0 +1,13 @@
+{
+  "name": "webship-js-tests",
+  "version": "1.0.0",
+  "description": "Webship-JS BDD tests for DDEV project",
+  "scripts": {
+    "test": "cucumber-js --config cucumber.js",
+    "test:firefox": "BROWSER=firefox cucumber-js --config cucumber.js",
+    "test:webkit": "BROWSER=webkit cucumber-js --config cucumber.js"
+  },
+  "dependencies": {
+    "webship-js": ">=2.0.0-beta1"
+  }
+}

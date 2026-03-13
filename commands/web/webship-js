@@ -1,0 +1,10 @@
+#!/bin/sh
+#ddev-generated
+
+cd test/webship-js || exit 1
+
+if [ -f yarn.lock ]; then
+  yarn && yarn cucumber-js --config cucumber.js "$@"
+else
+  npm install && npx cucumber-js --config cucumber.js "$@"
+fi

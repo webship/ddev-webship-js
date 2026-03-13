@@ -15,8 +15,7 @@
 setup() {
   set -eu -o pipefail
 
-  # Override this variable for your add-on:
-  export GITHUB_REPO=ddev/ddev-addon-template
+  export GITHUB_REPO=webship/ddev-webship-js
 
   TEST_BREW_PREFIX="$(brew --prefix 2>/dev/null || true)"
   export BATS_LIB_PATH="${BATS_LIB_PATH}:${TEST_BREW_PREFIX}/lib:/usr/lib/bats"
@@ -32,31 +31,22 @@ setup() {
   export DDEV_NO_INSTRUMENTATION=true
   ddev delete -Oy "${PROJNAME}" >/dev/null 2>&1 || true
   cd "${TESTDIR}"
-  run ddev config --project-name="${PROJNAME}" --project-tld=ddev.site
+  mkdir -p web
+  run ddev config --project-name="${PROJNAME}" --docroot=web --project-type=php
   assert_success
   run ddev start -y
   assert_success
 }
 
 health_checks() {
-  # Do something useful here that verifies the add-on
-
-  # You can check for specific information in headers:
-  # run curl -sfI https://${PROJNAME}.ddev.site
-  # assert_output --partial "HTTP/2 200"
-  # assert_output --partial "test_header"
-
-  # Or check if some command gives expected output:
-  DDEV_DEBUG=true run ddev launch
-  assert_success
-  assert_output --partial "FULLURL https://${PROJNAME}.ddev.site"
+  # Verify that the PHP info page is accessible.
+  ddev exec "curl -sk https://localhost/ | grep -q 'PHP Version'"
 }
 
 teardown() {
   set -eu -o pipefail
   ddev delete -Oy "${PROJNAME}" >/dev/null 2>&1
-  # Persist TESTDIR if running inside GitHub Actions. Useful for uploading test result artifacts
-  # See example at https://github.com/ddev/github-action-add-on-test#preserving-artifacts
+  # Persist TESTDIR if running inside GitHub Actions.
   if [ -n "${GITHUB_ENV:-}" ]; then
     [ -e "${GITHUB_ENV:-}" ] && echo "TESTDIR=${HOME}/tmp/${PROJNAME}" >> "${GITHUB_ENV}"
   else
@@ -64,14 +54,53 @@ teardown() {
   fi
 }
 
-@test "install from directory" {
+get_addon() {
   set -eu -o pipefail
-  echo "# ddev add-on get ${DIR} with project ${PROJNAME} in $(pwd)" >&3
+  cd "${TESTDIR}"
+  echo "# ddev add-on get ${DIR} with project ${PROJNAME} in ${TESTDIR} ($(pwd))" >&3
   run ddev add-on get "${DIR}"
   assert_success
-  run ddev restart -y
+  assert [ -f .ddev/config.webship-js.yml ]
+  assert [ -f .ddev/commands/host/install-webship-js ]
+  assert [ -f .ddev/commands/web/webship-js ]
+  assert [ -f .ddev/web-build/.gitignore ]
+  assert [ -f .ddev/web-build/disabled.Dockerfile.webship-js ]
+  assert [ -f .ddev/web-build/Dockerfile.task ]
+  assert [ -x .ddev/web-build/install-task.sh ]
+  mkdir -p test
+}
+
+@test "install from directory with npm" {
+  get_addon
+
+  # Copy web content for health checks.
+  cp -av "$DIR"/tests/testdata/web/* web/
+  assert [ -f web/index.php ]
+
+  # Copy testdata webship-js configuration to test/webship-js.
+  cp -av "$DIR"/tests/testdata/npm-webship-js test/webship-js
+
+  # Install webship-js (copies Dockerfile and restarts DDEV).
+  run ddev install-webship-js
   assert_success
+
+  # Verify task runner is available.
+  ddev exec -- which task
+
   health_checks
+
+  # Verify that Playwright browsers have been downloaded.
+  ddev exec -- ls \~/.cache/ms-playwright
+
+  # Run the phpinfo BDD feature test (skips Drupal-specific @drupal tagged tests).
+  run ddev webship-js --tags 'not @drupal' tests/features/phpinfo.feature
+  assert_success
+}
+
+@test "install requires a webship-js package.json" {
+  get_addon
+  run ddev install-webship-js
+  assert_failure
 }
 
 # bats test_tags=release
@@ -82,5 +111,4 @@ teardown() {
   assert_success
   run ddev restart -y
   assert_success
-  health_checks
 }

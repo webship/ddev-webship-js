@@ -1,0 +1,20 @@
+#ddev-generated
+hooks:
+  pre-start:
+    # If webship-js is enabled, make sure we get any changes.
+    - exec-host: |
+        ([[ -f .ddev/web-build/Dockerfile.webship-js ]] && \
+          cp .ddev/web-build/disabled.Dockerfile.webship-js .ddev/web-build/Dockerfile.webship-js) || true
+    - exec-host: |
+        if [[ -f .ddev/web-build/Dockerfile.webship-js ]]
+        then
+          rm -rf .ddev/web-build/webship-js
+          cp -r test/webship-js .ddev/web-build/
+        fi
+  post-start:
+    # Clean up the webship-js directory copied for builds.
+    # We want to remove this otherwise future ddev get's will not copy in
+    # changes to the web-build directory.
+    - exec-host: rm -rf .ddev/web-build/webship-js
+web_environment:
+  - LAUNCH_URL=https://localhost
