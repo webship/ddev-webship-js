@@ -8,8 +8,6 @@ project_files:
   - commands/web/webship-js
   - web-build/.gitignore
   - web-build/disabled.Dockerfile.webship-js
-  - web-build/Dockerfile.task
-  - web-build/install-task.sh
   - config.webship-js.yml
 
 ddev_version_constraint: '>= v1.24.10'
