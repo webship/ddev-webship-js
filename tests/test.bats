@@ -61,7 +61,7 @@ get_addon() {
   run ddev add-on get "${DIR}"
   assert_success
   assert [ -f .ddev/config.webship-js.yml ]
-  assert [ -f .ddev/commands/host/install-webship-js ]
+  assert [ -f .ddev/commands/host/init-webship-js ]
   assert [ -f .ddev/commands/web/webship-js ]
   assert [ -f .ddev/web-build/.gitignore ]
   assert [ -f .ddev/web-build/disabled.Dockerfile.webship-js ]
@@ -83,7 +83,7 @@ get_addon() {
   assert [ -f web/example/index.html ]
 
   # Install webship-js (copies Dockerfile and restarts DDEV).
-  run ddev install-webship-js
+  run ddev init-webship-js
   assert_success
 
   # Verify task runner is available.

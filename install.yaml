@@ -4,7 +4,7 @@ name: ddev-webship-js
 # Each file should contain #ddev-generated so it can be replaced by a later `ddev get`
 # if it hasn't been modified by the user.
 project_files:
-  - commands/host/install-webship-js
+  - commands/host/init-webship-js
   - commands/web/webship-js
   - web-build/.gitignore
   - web-build/disabled.Dockerfile.webship-js
@@ -124,7 +124,7 @@ post_install_actions:
     // Add your custom step definitions here.
     WEBSHIP_EOF
       echo "Webship-JS test directory created at test/webship-js/"
-      echo "Run 'ddev install-webship-js' to build the container with Playwright browsers."
+      echo "Run 'ddev init-webship-js' to build the container with Playwright browsers."
     fi
 
 removal_actions:

@@ -8,7 +8,7 @@ This add-on integrates [Webship-JS](https://webship.co/docs/webship-js/2.0.x) â€
 
 ```bash
 ddev add-on get webship/ddev-webship-js
-ddev install-webship-js
+ddev init-webship-js
 ddev webship-js
 ```
 
