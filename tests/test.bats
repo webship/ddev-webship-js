@@ -39,8 +39,8 @@ setup() {
 }
 
 health_checks() {
-  # Verify that the PHP info page is accessible.
-  ddev exec "curl -sk https://localhost/ | grep -q 'PHP Version'"
+  # Verify that the example page is accessible.
+  ddev exec "curl -sk https://localhost/example/ | grep -q 'Welcome to Webship-JS'"
 }
 
 teardown() {
@@ -67,7 +67,12 @@ get_addon() {
   assert [ -f .ddev/web-build/disabled.Dockerfile.webship-js ]
   assert [ -f .ddev/web-build/Dockerfile.task ]
   assert [ -x .ddev/web-build/install-task.sh ]
-  mkdir -p test
+  assert [ -f test/webship-js/package.json ]
+  assert [ -f test/webship-js/cucumber.js ]
+  assert [ -f test/webship-js/playwright.config.ts ]
+  assert [ -f test/webship-js/tsconfig.json ]
+  assert [ -f test/webship-js/tests/features/example.feature ]
+  assert [ -f test/webship-js/tests/step-definitions/custom.js ]
 }
 
 @test "install from directory with npm" {
@@ -75,10 +80,7 @@ get_addon() {
 
   # Copy web content for health checks.
   cp -av "$DIR"/tests/testdata/web/* web/
-  assert [ -f web/index.php ]
-
-  # Copy testdata webship-js configuration to test/webship-js.
-  cp -av "$DIR"/tests/testdata/npm-webship-js test/webship-js
+  assert [ -f web/example/index.html ]
 
   # Install webship-js (copies Dockerfile and restarts DDEV).
   run ddev install-webship-js
@@ -92,15 +94,9 @@ get_addon() {
   # Verify that Playwright browsers have been downloaded.
   ddev exec -- ls \~/.cache/ms-playwright
 
-  # Run the phpinfo BDD feature test (skips Drupal-specific @drupal tagged tests).
-  run ddev webship-js --tags 'not @drupal' tests/features/phpinfo.feature
+  # Run the example page BDD feature test.
+  run ddev webship-js tests/features/example.feature
   assert_success
-}
-
-@test "install requires a webship-js package.json" {
-  get_addon
-  run ddev install-webship-js
-  assert_failure
 }
 
 # bats test_tags=release

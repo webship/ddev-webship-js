@@ -12,5 +12,120 @@ project_files:
 
 ddev_version_constraint: '>= v1.24.10'
 
+post_install_actions:
+  - |
+    if [ ! -d test/webship-js ]; then
+      mkdir -p test/webship-js/tests/features test/webship-js/tests/step-definitions
+      cat > test/webship-js/package.json << 'WEBSHIP_EOF'
+    {
+      "name": "webship-js-tests",
+      "version": "1.0.0",
+      "description": "Webship-JS BDD tests for DDEV project",
+      "scripts": {
+        "test": "cucumber-js --config cucumber.js",
+        "test:firefox": "BROWSER=firefox cucumber-js --config cucumber.js",
+        "test:webkit": "BROWSER=webkit cucumber-js --config cucumber.js"
+      },
+      "dependencies": {
+        "webship-js": ">=2.0.0-beta1"
+      }
+    }
+    WEBSHIP_EOF
+      cat > test/webship-js/cucumber.js << 'WEBSHIP_EOF'
+    module.exports = {
+      default: {
+        timeout: 30000,
+        requireModule: ['ts-node/register'],
+        require: [
+          'node_modules/webship-js/tests/step-definitions/**/*.js',
+          'tests/step-definitions/**/*.js',
+        ],
+        paths: ['tests/features/**/*.feature'],
+        format: [
+          '@cucumber/pretty-formatter',
+        ],
+        worldParameters: {
+          launchUrl: process.env.LAUNCH_URL || 'https://localhost',
+          minWaitTime: {
+            page: 3000,
+            before_scenario: 0,
+            after_scenario: 0,
+            before_step: 0,
+            after_step: 0,
+          },
+        },
+      },
+    };
+    WEBSHIP_EOF
+      cat > test/webship-js/playwright.config.ts << 'WEBSHIP_EOF'
+    import type { LaunchOptions, BrowserContextOptions } from 'playwright';
+
+    type BrowserName = 'chromium' | 'firefox' | 'webkit';
+
+    const browser = (process.env.BROWSER || 'chromium') as BrowserName;
+
+    const chromiumArgs: string[] = [
+      '--no-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-setuid-sandbox',
+      '--disable-web-security',
+      '--ignore-certificate-errors',
+      '--disable-extensions',
+      '--incognito',
+      '--disable-infobars',
+    ];
+
+    interface PlaywrightConfig {
+      browser: BrowserName;
+      launchOptions: LaunchOptions;
+      contextOptions: BrowserContextOptions;
+    }
+
+    const config: PlaywrightConfig = {
+      browser,
+      launchOptions: {
+        headless: true,
+        slowMo: 300,
+        args: browser === 'chromium' ? chromiumArgs : [],
+      },
+      contextOptions: {
+        viewport: { width: 1600, height: 1200 },
+        ignoreHTTPSErrors: true,
+      },
+    };
+
+    export = config;
+    WEBSHIP_EOF
+      cat > test/webship-js/tsconfig.json << 'WEBSHIP_EOF'
+    {
+      "compilerOptions": {
+        "target": "ES2020",
+        "module": "CommonJS",
+        "strict": true,
+        "esModuleInterop": true,
+        "types": ["node"]
+      },
+      "include": ["playwright.config.ts"]
+    }
+    WEBSHIP_EOF
+      cat > test/webship-js/tests/features/example.feature << 'WEBSHIP_EOF'
+    Feature: Example page verification
+      As a developer
+      I want to verify that the example page loads correctly inside DDEV
+      So I can confirm the web environment is working
+
+      Scenario: Verify example page loads and shows expected content
+        Given I am on "/example/" page
+        Then I should see "Welcome to Webship-JS"
+    WEBSHIP_EOF
+      cat > test/webship-js/tests/step-definitions/custom.js << 'WEBSHIP_EOF'
+    const { Given, When, Then } = require('@cucumber/cucumber');
+
+    // Add your custom step definitions here.
+    WEBSHIP_EOF
+      echo "Webship-JS test directory created at test/webship-js/"
+      echo "Run 'ddev install-webship-js' to build the container with Playwright browsers."
+    fi
+
 removal_actions:
   - if grep "#ddev-generated" web-build/Dockerfile.webship-js 2>/dev/null; then rm web-build/Dockerfile.webship-js; fi
