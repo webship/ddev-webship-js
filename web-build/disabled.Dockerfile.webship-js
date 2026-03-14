@@ -12,43 +12,32 @@ RUN wget -qO /usr/share/keyrings/deb.sury.org-php.gpg https://packages.sury.org/
 
 RUN apt-get update
 
-# Install webship-js npm dependencies and Playwright browsers.
+# Install webship-js from GitHub and Playwright browsers.
 #
 # Manual changes to Dockerfile.webship-js will be reverted every time ddev
 # start is run. In general, edit this file instead.
 #
 # This step:
-# 1. Creates a copy of the webship-js directory in the image (via bind mount).
-#    A pre-start hook copies test/webship-js into .ddev/web-build/webship-js
-#    so Docker can access it here.
-# 2. Runs npm install to install webship-js and its dependencies (including
-#    Playwright). Browsers are then installed to ~/.cache/ms-playwright.
-# 3. Removes the temporary copy so that future ddev get's work correctly.
-#
-# See https://github.com/ddev/ddev/issues/4727.
+# 1. Creates a temporary directory and installs webship-js directly from
+#    https://github.com/webship/webship-js (no bind mount needed).
+# 2. Runs playwright install-deps and playwright install so browsers are
+#    cached in the image at ~/.cache/ms-playwright.
+# 3. Removes the temporary directory.
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
   --mount=type=cache,target=/var/lib/apt,sharing=locked \
   --mount=type=cache,target=/dot-cache,sharing=locked \
-  --mount=type=bind,source=./webship-js,target=/webship-js \
-  sudo -u $username mkdir -p /var/www/html/test \
-  && cp -a /webship-js /var/www/html/test \
-  && chown -R $username:$username /var/www/html/test/webship-js \
-  && chown -R $username:$username /dot-cache \
-  && sudo -u $username ln -s /dot-cache /home/$username/.cache \
-  && cd /var/www/html/test/webship-js \
-  && if [ -f yarn.lock ]; then \
-       export JS_PKG_MANAGER=yarn; \
-       corepack enable; \
-       sudo -u $username $JS_PKG_MANAGER; \
-     else \
-       sudo -u $username npm install; \
-     fi \
+  chown -R $username:$username /dot-cache \
+  && sudo -u $username ln -sf /dot-cache /home/$username/.cache \
+  && mkdir -p /tmp/webship-js-setup \
+  && chown $username:$username /tmp/webship-js-setup \
+  && cd /tmp/webship-js-setup \
+  && sudo -u $username npm install github:webship/webship-js \
   && sudo -u $username npx playwright install-deps \
   && sudo -u $username npx playwright install \
-  && rm -rf /var/www/html/test/webship-js \
-  && rm /home/$username/.cache \
+  && rm -rf /tmp/webship-js-setup \
+  && rm -f /home/$username/.cache \
   && sudo -u $username mkdir -p /home/$username/.cache \
-  && sudo -u $username cp -a /dot-cache/* /home/$username/.cache/
+  && sudo -u $username cp -a /dot-cache/. /home/$username/.cache/
 
 # We're done with apt so disable caching again for the final image.
 RUN mv /etc/apt/docker-clean-disabled /etc/apt/apt.conf.d/docker-clean

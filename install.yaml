@@ -27,7 +27,7 @@ post_install_actions:
         "test:webkit": "BROWSER=webkit cucumber-js --config cucumber.js"
       },
       "dependencies": {
-        "webship-js": ">=2.0.0-beta1"
+        "webship-js": "github:webship/webship-js"
       }
     }
     WEBSHIP_EOF
