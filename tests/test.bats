@@ -94,7 +94,7 @@ get_addon() {
   # Verify that Playwright browsers have been downloaded.
   ddev exec -- ls \~/.cache/ms-playwright
 
-  # Run the example page BDD feature test.
+  # Run the example page TDD feature test.
   run ddev webship-js tests/features/example.feature
   assert_success
 }
