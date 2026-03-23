@@ -12,4 +12,4 @@ ddev init-webship-js
 ddev webship-js
 ```
 
-`ddev add-on get` automatically scaffolds `test/webship-js/` with all required configuration files and a starter feature file. After installation, commit the `.ddev` directory to version control.
+`ddev add-on get` automatically scaffolds the project with all required configuration files and a starter feature file. After installation, commit the `.ddev` directory to version control.

@@ -67,12 +67,12 @@ get_addon() {
   assert [ -f .ddev/web-build/disabled.Dockerfile.webship-js ]
   assert [ -f .ddev/web-build/Dockerfile.task ]
   assert [ -x .ddev/web-build/install-task.sh ]
-  assert [ -f test/webship-js/package.json ]
-  assert [ -f test/webship-js/cucumber.js ]
-  assert [ -f test/webship-js/playwright.config.ts ]
-  assert [ -f test/webship-js/tsconfig.json ]
-  assert [ -f test/webship-js/tests/features/example.feature ]
-  assert [ -f test/webship-js/tests/step-definitions/custom.js ]
+  assert [ -f package.json ]
+  assert [ -f cucumber.js ]
+  assert [ -f playwright.config.ts ]
+  assert [ -f tsconfig.json ]
+  assert [ -f tests/features/example.feature ]
+  assert [ -f tests/step-definitions/custom.js ]
 }
 
 @test "install from directory with npm" {
