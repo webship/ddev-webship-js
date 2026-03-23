@@ -6,11 +6,11 @@
 
 # For local tests, install bats-core, bats-assert, bats-file, bats-support
 # And run this in the add-on root directory:
-#   bats ./tests/test.bats
+#   bats ./test/test.bats
 # To exclude release tests:
-#   bats ./tests/test.bats --filter-tags '!release'
+#   bats ./test/test.bats --filter-tags '!release'
 # For debugging:
-#   bats ./tests/test.bats --show-output-of-passing-tests --verbose-run --print-output-on-failure
+#   bats ./test/test.bats --show-output-of-passing-tests --verbose-run --print-output-on-failure
 
 setup() {
   set -eu -o pipefail
@@ -71,15 +71,15 @@ get_addon() {
   assert [ -f cucumber.js ]
   assert [ -f playwright.config.ts ]
   assert [ -f tsconfig.json ]
-  assert [ -f tests/features/example.feature ]
-  assert [ -f tests/step-definitions/custom.js ]
+  assert [ -f test/features/example.feature ]
+  assert [ -f test/step-definitions/custom.js ]
 }
 
 @test "install from directory with npm" {
   get_addon
 
   # Copy web content for health checks.
-  cp -av "$DIR"/tests/testdata/web/* web/
+  cp -av "$DIR"/test/testdata/web/* web/
   assert [ -f web/example/index.html ]
 
   # Install webship-js (copies Dockerfile and restarts DDEV).
@@ -95,7 +95,7 @@ get_addon() {
   ddev exec -- ls \~/.cache/ms-playwright
 
   # Run the example page TDD feature test.
-  run ddev webship-js tests/features/example.feature
+  run ddev webship-js test/features/example.feature
   assert_success
 }
 

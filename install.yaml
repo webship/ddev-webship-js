@@ -15,7 +15,7 @@ ddev_version_constraint: '>= v1.24.10'
 post_install_actions:
   - |
     if [ ! -f ./package.json ]; then
-      mkdir -p tests/features tests/step-definitions
+      mkdir -p test/features test/step-definitions
       cat > ./package.json << 'WEBSHIP_EOF'
     {
       "name": "webship-js-tests",
@@ -37,10 +37,10 @@ post_install_actions:
         timeout: 30000,
         requireModule: ['ts-node/register'],
         require: [
-          'node_modules/webship/webship-js/tests/step-definitions/**/*.js',
-          'tests/step-definitions/**/*.js',
+          'node_modules/webship/webship-js/test/step-definitions/**/*.js',
+          'test/step-definitions/**/*.js',
         ],
-        paths: ['tests/features/**/*.feature'],
+        paths: ['test/features/**/*.feature'],
         format: [
           '@cucumber/pretty-formatter',
         ],
@@ -108,7 +108,7 @@ post_install_actions:
       "include": ["playwright.config.ts"]
     }
     WEBSHIP_EOF
-      cat > tests/features/example.feature << 'WEBSHIP_EOF'
+      cat > test/features/example.feature << 'WEBSHIP_EOF'
     Feature: Example page verification
       As a developer
       I want to verify that the example page loads correctly inside DDEV
@@ -118,7 +118,7 @@ post_install_actions:
         Given I am on "/example/" page
         Then I should see "Welcome to Webship-JS"
     WEBSHIP_EOF
-      cat > tests/step-definitions/custom.js << 'WEBSHIP_EOF'
+      cat > test/step-definitions/custom.js << 'WEBSHIP_EOF'
     const { Given, When, Then } = require('@cucumber/cucumber');
 
     // Add your custom step definitions here.
