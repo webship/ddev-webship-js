@@ -71,8 +71,8 @@ get_addon() {
   assert [ -f cucumber.js ]
   assert [ -f playwright.config.ts ]
   assert [ -f tsconfig.json ]
-  assert [ -f test/features/example.feature ]
-  assert [ -f test/step-definitions/custom.js ]
+  assert [ -f tests/features/example.feature ]
+  assert [ -f tests/step-definitions/custom.js ]
 }
 
 @test "install from directory with npm" {
@@ -95,7 +95,7 @@ get_addon() {
   ddev exec -- ls \~/.cache/ms-playwright
 
   # Run the example page TDD feature test.
-  run ddev webship-js test/features/example.feature
+  run ddev webship-js tests/features/example.feature
   assert_success
 }
 

@@ -14,8 +14,12 @@ ddev_version_constraint: '>= v1.24.10'
 
 post_install_actions:
   - |
+    echo "--- Debugging post_install_actions ---"
+    echo "Current directory: $(pwd)"
+    echo "Checking for package.json..."
     if [ ! -f ./package.json ]; then
-      mkdir -p test/features test/step-definitions
+      echo "package.json not found. Creating files..."
+      mkdir -p tests/features tests/step-definitions
       cat > ./package.json << 'WEBSHIP_EOF'
     {
       "name": "webship-js-tests",
@@ -37,10 +41,10 @@ post_install_actions:
         timeout: 30000,
         requireModule: ['ts-node/register'],
         require: [
-          'node_modules/webship/webship-js/test/step-definitions/**/*.js',
-          'test/step-definitions/**/*.js',
+          'node_modules/webship/webship-js/tests/step-definitions/**/*.js',
+          'tests/step-definitions/**/*.js',
         ],
-        paths: ['test/features/**/*.feature'],
+        paths: ['tests/features/**/*.feature'],
         format: [
           '@cucumber/pretty-formatter',
         ],
@@ -108,7 +112,7 @@ post_install_actions:
       "include": ["playwright.config.ts"]
     }
     WEBSHIP_EOF
-      cat > test/features/example.feature << 'WEBSHIP_EOF'
+      cat > tests/features/example.feature << 'WEBSHIP_EOF'
     Feature: Example page verification
       As a developer
       I want to verify that the example page loads correctly inside DDEV
@@ -118,14 +122,17 @@ post_install_actions:
         Given I am on "/example/" page
         Then I should see "Welcome to Webship-JS"
     WEBSHIP_EOF
-      cat > test/step-definitions/custom.js << 'WEBSHIP_EOF'
+      cat > tests/step-definitions/custom.js << 'WEBSHIP_EOF'
     const { Given, When, Then } = require('@cucumber/cucumber');
 
     // Add your custom step definitions here.
     WEBSHIP_EOF
       echo "Webship-JS test directory created at ./"
       echo "Run 'ddev init-webship-js' to build the container with Playwright browsers."
+    else
+      echo "package.json found. Skipping file creation."
     fi
+    echo "--- End of debugging ---"
 
 removal_actions:
   - if grep "#ddev-generated" web-build/Dockerfile.webship-js 2>/dev/null; then rm web-build/Dockerfile.webship-js; fi
