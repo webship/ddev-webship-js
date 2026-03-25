@@ -12,22 +12,36 @@ ddev add-on get webship/ddev-webship-js
 
 `ddev add-on get` automatically scaffolds the project with all required configuration files and a starter feature file, installs Playwright browsers, and restarts the DDEV environment.
 
-## Running Tests
+## Install Dependencies
 
-For new projects (no existing package.json):
+With npm:
 
 ```bash
-ddev npm test                    # Run all tests with Chromium
-ddev npm run test:firefox        # Run all tests with Firefox
-ddev npm run test:webkit         # Run all tests with WebKit
+ddev npm install
 ```
 
-For existing projects (e.g. Drupal, where webship-js is added to your package.json):
+With yarn:
+
+```bash
+ddev yarn install
+```
+
+## Running Tests
+
+With npm:
 
 ```bash
 ddev npm run test:chromium      # Run all tests with Chromium
 ddev npm run test:firefox       # Run all tests with Firefox
 ddev npm run test:webkit        # Run all tests with WebKit
+```
+
+With yarn:
+
+```bash
+ddev yarn test:chromium         # Run all tests with Chromium
+ddev yarn test:firefox          # Run all tests with Firefox
+ddev yarn test:webkit           # Run all tests with WebKit
 ```
 
 To run a specific feature file:
