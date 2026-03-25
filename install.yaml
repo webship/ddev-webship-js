@@ -64,7 +64,7 @@ post_install_actions:
           '@cucumber/pretty-formatter',
         ],
         worldParameters: {
-          launchUrl: process.env.LAUNCH_URL || 'https://localhost',
+          launchUrl: process.env.LAUNCH_URL || process.env.DDEV_PRIMARY_URL || 'https://localhost',
           minWaitTime: {
             page: 3000,
             before_scenario: 0,
