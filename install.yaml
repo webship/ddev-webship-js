@@ -4,8 +4,6 @@ name: ddev-webship-js
 # Each file should contain #ddev-generated so it can be replaced by a later `ddev get`
 # if it hasn't been modified by the user.
 project_files:
-  - commands/host/init-webship-js
-  - commands/web/webship-js
   - web-build/.gitignore
   - web-build/disabled.Dockerfile.webship-js
   - config.webship-js.yml
@@ -14,34 +12,35 @@ ddev_version_constraint: '>= v1.24.10'
 
 post_install_actions:
   - |
-    echo "--- Debugging post_install_actions ---"
-    echo "Current directory: $(pwd)"
-    echo "Checking for package.json..."
-    if [ ! -f ./package.json ]; then
-      echo "package.json not found. Creating files..."
-      mkdir -p tests/features tests/step-definitions
-      cat > ./package.json << 'WEBSHIP_EOF'
+    # post_install_actions run from inside .ddev/; use .. for project root
+    PROJDIR="$(pwd)/.."
+    if [ ! -f "${PROJDIR}/cucumber.js" ]; then
+      mkdir -p "${PROJDIR}/tests/features" "${PROJDIR}/tests/step-definitions"
+      if [ ! -f "${PROJDIR}/package.json" ]; then
+        cat > "${PROJDIR}/package.json" << 'WEBSHIP_EOF'
     {
       "name": "webship-js-tests",
-      "version": "1.0.0",
-      "description": "Webship-JS TDD tests for DDEV project",
+      "version": "2.0.0",
+      "description": "Webship-JS Automated Functional Acceptance Testing for DDEV project",
+      "type": "commonjs",
       "scripts": {
         "test": "cucumber-js --config cucumber.js",
         "test:firefox": "BROWSER=firefox cucumber-js --config cucumber.js",
         "test:webkit": "BROWSER=webkit cucumber-js --config cucumber.js"
       },
       "dependencies": {
-        "webship-js": "github:webship/webship-js"
+        "webship-js": "^2"
       }
     }
     WEBSHIP_EOF
-      cat > ./cucumber.js << 'WEBSHIP_EOF'
+      fi
+      cat > "${PROJDIR}/cucumber.js" << 'WEBSHIP_EOF'
     module.exports = {
       default: {
         timeout: 30000,
         requireModule: ['ts-node/register'],
         require: [
-          'node_modules/webship/webship-js/tests/step-definitions/**/*.js',
+          'node_modules/webship-js/tests/step-definitions/**/*.js',
           'tests/step-definitions/**/*.js',
         ],
         paths: ['tests/features/**/*.feature'],
@@ -61,7 +60,7 @@ post_install_actions:
       },
     };
     WEBSHIP_EOF
-      cat > ./playwright.config.ts << 'WEBSHIP_EOF'
+      cat > "${PROJDIR}/playwright.config.ts" << 'WEBSHIP_EOF'
     import type { LaunchOptions, BrowserContextOptions } from 'playwright';
 
     type BrowserName = 'chromium' | 'firefox' | 'webkit';
@@ -101,7 +100,7 @@ post_install_actions:
 
     export = config;
     WEBSHIP_EOF
-      cat > ./tsconfig.json << 'WEBSHIP_EOF'
+      cat > "${PROJDIR}/tsconfig.json" << 'WEBSHIP_EOF'
     {
       "compilerOptions": {
         "target": "ES2020",
@@ -113,7 +112,7 @@ post_install_actions:
       "include": ["playwright.config.ts"]
     }
     WEBSHIP_EOF
-      cat > tests/features/example.feature << 'WEBSHIP_EOF'
+      cat > "${PROJDIR}/tests/features/example.feature" << 'WEBSHIP_EOF'
     Feature: Example page verification
       As a developer
       I want to verify that the example page loads correctly inside DDEV
@@ -123,17 +122,15 @@ post_install_actions:
         Given I am on homepage
         Then I should see "Welcome to Webship-JS"
     WEBSHIP_EOF
-      cat > tests/step-definitions/custom.js << 'WEBSHIP_EOF'
+      cat > "${PROJDIR}/tests/step-definitions/custom.js" << 'WEBSHIP_EOF'
     const { Given, When, Then } = require('@cucumber/cucumber');
 
     // Add your custom step definitions here.
     WEBSHIP_EOF
-      echo "Webship-JS test directory created at ./"
-      echo "Run 'ddev init-webship-js' to build the container with Playwright browsers."
-    else
-      echo "package.json found. Skipping file creation."
+      echo "Webship-JS test directory created at ${PROJDIR}/"
     fi
-    echo "--- End of debugging ---"
+    cp web-build/disabled.Dockerfile.webship-js web-build/Dockerfile.webship-js
+    ddev restart
 
 removal_actions:
   - if grep "#ddev-generated" web-build/Dockerfile.webship-js 2>/dev/null; then rm web-build/Dockerfile.webship-js; fi
