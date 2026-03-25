@@ -22,7 +22,7 @@ post_install_actions:
     {
       "name": "webship-js-tests",
       "version": "2.0.0",
-      "description": "Webship-JS TDD tests for DDEV project",
+      "description": "Webship-JS Automated Functional Acceptance Testing for DDEV project",
       "type": "commonjs",
       "scripts": {
         "test": "cucumber-js --config cucumber.js",
