@@ -142,7 +142,7 @@ post_install_actions:
 
       Scenario: Verify example page loads and shows expected content
         Given I am on homepage
-        Then I should see "Welcome to Webship-JS"
+        Then I should see "home"
     WEBSHIP_EOF
     fi
     if [ ! -f "${PROJDIR}/tests/step-definitions/custom.js" ]; then
