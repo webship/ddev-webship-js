@@ -26,10 +26,11 @@ setup() {
   export DIR="$(cd "$(dirname "${BATS_TEST_FILENAME}")/.." >/dev/null 2>&1 && pwd)"
   export PROJNAME="test-$(basename "${GITHUB_REPO}")"
   mkdir -p "${HOME}/tmp"
-  export TESTDIR="${DIR}"
+  export TESTDIR="$(mktemp -d "${HOME}/tmp/${PROJNAME}.XXXXXX")"
   export DDEV_NONINTERACTIVE=true
   export DDEV_NO_INSTRUMENTATION=true
   ddev delete -Oy "${PROJNAME}" >/dev/null 2>&1 || true
+  export TESTDIR="${HOME}"
   cd "${TESTDIR}"
   mkdir -p web
   run ddev config --project-name="${PROJNAME}" --docroot=web --project-type=php
