@@ -14,10 +14,24 @@ post_install_actions:
   - |
     # post_install_actions run from inside .ddev/; use .. for project root
     PROJDIR="$(pwd)/.."
-    if [ ! -f "${PROJDIR}/cucumber.js" ]; then
-      mkdir -p "${PROJDIR}/tests/features" "${PROJDIR}/tests/step-definitions"
-      if [ ! -f "${PROJDIR}/package.json" ]; then
-        cat > "${PROJDIR}/package.json" << 'WEBSHIP_EOF'
+    mkdir -p "${PROJDIR}/tests/features" "${PROJDIR}/tests/step-definitions"
+    # If package.json exists, add webship-js dependency to it; otherwise create one
+    if [ -f "${PROJDIR}/package.json" ]; then
+      if ! grep -q '"webship-js"' "${PROJDIR}/package.json"; then
+        node -e "
+          var pkg = JSON.parse(require('fs').readFileSync('${PROJDIR}/package.json', 'utf8'));
+          pkg.dependencies = pkg.dependencies || {};
+          pkg.dependencies['webship-js'] = '^2';
+          pkg.scripts = pkg.scripts || {};
+          pkg.scripts['test:chromium'] = pkg.scripts['test:chromium'] || 'cucumber-js --config cucumber.js';
+          pkg.scripts['test:firefox'] = pkg.scripts['test:firefox'] || 'BROWSER=firefox cucumber-js --config cucumber.js';
+          pkg.scripts['test:webkit'] = pkg.scripts['test:webkit'] || 'BROWSER=webkit cucumber-js --config cucumber.js';
+          require('fs').writeFileSync('${PROJDIR}/package.json', JSON.stringify(pkg, null, 2) + '\n');
+        "
+        echo "Added webship-js dependency to existing package.json"
+      fi
+    else
+      cat > "${PROJDIR}/package.json" << 'WEBSHIP_EOF'
     {
       "name": "webship-js-tests",
       "version": "2.0.0",
@@ -33,7 +47,9 @@ post_install_actions:
       }
     }
     WEBSHIP_EOF
-      fi
+      echo "Created package.json"
+    fi
+    if [ ! -f "${PROJDIR}/cucumber.js" ]; then
       cat > "${PROJDIR}/cucumber.js" << 'WEBSHIP_EOF'
     module.exports = {
       default: {
@@ -60,6 +76,8 @@ post_install_actions:
       },
     };
     WEBSHIP_EOF
+    fi
+    if [ ! -f "${PROJDIR}/playwright.config.ts" ]; then
       cat > "${PROJDIR}/playwright.config.ts" << 'WEBSHIP_EOF'
     import type { LaunchOptions, BrowserContextOptions } from 'playwright';
 
@@ -100,6 +118,8 @@ post_install_actions:
 
     export = config;
     WEBSHIP_EOF
+    fi
+    if [ ! -f "${PROJDIR}/tsconfig.json" ]; then
       cat > "${PROJDIR}/tsconfig.json" << 'WEBSHIP_EOF'
     {
       "compilerOptions": {
@@ -112,6 +132,8 @@ post_install_actions:
       "include": ["playwright.config.ts"]
     }
     WEBSHIP_EOF
+    fi
+    if [ ! -f "${PROJDIR}/tests/features/example.feature" ]; then
       cat > "${PROJDIR}/tests/features/example.feature" << 'WEBSHIP_EOF'
     Feature: Example page verification
       As a developer
@@ -122,12 +144,13 @@ post_install_actions:
         Given I am on homepage
         Then I should see "Welcome to Webship-JS"
     WEBSHIP_EOF
+    fi
+    if [ ! -f "${PROJDIR}/tests/step-definitions/custom.js" ]; then
       cat > "${PROJDIR}/tests/step-definitions/custom.js" << 'WEBSHIP_EOF'
     const { Given, When, Then } = require('@cucumber/cucumber');
 
     // Add your custom step definitions here.
     WEBSHIP_EOF
-      echo "Webship-JS test directory created at ${PROJDIR}/"
     fi
     cp web-build/disabled.Dockerfile.webship-js web-build/Dockerfile.webship-js
     ddev restart

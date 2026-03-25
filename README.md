@@ -14,10 +14,20 @@ ddev add-on get webship/ddev-webship-js
 
 ## Running Tests
 
+For new projects (no existing package.json):
+
 ```bash
 ddev npm test                    # Run all tests with Chromium
 ddev npm run test:firefox        # Run all tests with Firefox
 ddev npm run test:webkit         # Run all tests with WebKit
+```
+
+For existing projects (e.g. Drupal, where webship-js is added to your package.json):
+
+```bash
+ddev npm run test:chromium      # Run all tests with Chromium
+ddev npm run test:firefox       # Run all tests with Firefox
+ddev npm run test:webkit        # Run all tests with WebKit
 ```
 
 To run a specific feature file:
