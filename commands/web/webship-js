@@ -3,8 +3,11 @@
 
 cd /var/www/html || exit 1
 
-if [ -f yarn.lock ]; then
-  yarn && yarn cucumber-js --config cucumber.js "$@"
-else
-  npm install && npx cucumber-js --config cucumber.js "$@"
+export LAUNCH_URL="${LAUNCH_URL:-${DDEV_PRIMARY_URL:-https://localhost}}"
+
+# Ensure webship-js and its dependencies are available in node_modules
+if [ ! -d node_modules/webship-js ]; then
+  npm install --no-save webship-js
 fi
+
+npx cucumber-js --config cucumber.js "$@"

@@ -6,4 +6,4 @@ hooks:
         ([[ -f .ddev/web-build/Dockerfile.webship-js ]] && \
           cp .ddev/web-build/disabled.Dockerfile.webship-js .ddev/web-build/Dockerfile.webship-js) || true
 web_environment:
-  - LAUNCH_URL=https://localhost
+  - LAUNCH_URL=${DDEV_PRIMARY_URL}
