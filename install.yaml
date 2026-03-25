@@ -20,8 +20,8 @@ post_install_actions:
       if ! grep -q '"webship-js"' "${PROJDIR}/package.json"; then
         node -e "
           var pkg = JSON.parse(require('fs').readFileSync('${PROJDIR}/package.json', 'utf8'));
-          pkg.dependencies = pkg.dependencies || {};
-          pkg.dependencies['webship-js'] = '^2';
+          pkg.devDependencies = pkg.devDependencies || {};
+          pkg.devDependencies['webship-js'] = '^2';
           pkg.scripts = pkg.scripts || {};
           pkg.scripts['test:chromium'] = pkg.scripts['test:chromium'] || 'cucumber-js --config cucumber.js';
           pkg.scripts['test:firefox'] = pkg.scripts['test:firefox'] || 'BROWSER=firefox cucumber-js --config cucumber.js';
@@ -42,7 +42,7 @@ post_install_actions:
         "test:firefox": "BROWSER=firefox cucumber-js --config cucumber.js",
         "test:webkit": "BROWSER=webkit cucumber-js --config cucumber.js"
       },
-      "dependencies": {
+      "devDependencies": {
         "webship-js": "^2"
       }
     }
