@@ -6,10 +6,31 @@ hooks:
         ([[ -f .ddev/web-build/Dockerfile.webship-js ]] && \
           cp .ddev/web-build/disabled.Dockerfile.webship-js .ddev/web-build/Dockerfile.webship-js) || true
   post-start:
-    # Install webship-js dependencies via npm
+    # Install webship-js and scaffold project files via its CLI.
     - exec: |
-        if [ ! -d /var/www/html/node_modules/webship-js ]; then
-          cd /var/www/html && npm install --no-save webship-js
+        cd /var/www/html
+        if [ ! -d node_modules/webship-js ]; then
+          npm install --no-save webship-js
+        fi
+        # init-webship-js is idempotent — preserves existing files and merges
+        # scripts/devDependencies into an existing package.json.
+        # --skip-browsers because Dockerfile.webship-js already installs Playwright browsers.
+        if [ -x node_modules/.bin/init-webship-js ]; then
+          node_modules/.bin/init-webship-js --skip-browsers
+        fi
+        # Replace the default webship.co sample feature with a DDEV-universal one
+        # (only when still the untouched default — preserves user edits).
+        if [ -f tests/features/check-homepage.feature ] && grep -q 'Love to help in speeding up' tests/features/check-homepage.feature; then
+          cat > tests/features/check-homepage.feature << 'EOF'
+        Feature: Check the home page
+          As an anonymous user
+          I want to be able to visit the home page
+          So that I know that the site is reachable
+
+          Scenario: Check homepage is reachable
+            Given I am on homepage
+            Then I should be on homepage
+        EOF
         fi
 web_environment:
   - LAUNCH_URL=${DDEV_PRIMARY_URL}
