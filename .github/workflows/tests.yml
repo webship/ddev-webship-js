@@ -1,10 +1,11 @@
 name: tests
 on:
   pull_request:
+    branches: [ 2.0.x ]
     paths-ignore:
       - "**.md"
   push:
-    branches: [ main ]
+    branches: [ 2.0.x ]
     paths-ignore:
       - "**.md"
 
@@ -30,7 +31,8 @@ jobs:
   tests:
     strategy:
       matrix:
-        ddev_version: [stable, HEAD]
+        # Pinned to the lowest DDEV version install.yaml allows: stable and HEAD move under the tests.
+        ddev_version: ['tag:v1.24.7']
       fail-fast: false
 
     runs-on: ubuntu-latest
