@@ -9,6 +9,14 @@ hooks:
     # Install webship-js and scaffold project files via its CLI.
     - exec: |
         cd /var/www/html
+        # webship-js is made for Node.js 24 and 26, the LTS releases. DDEV 1.25 and later start a project on 24;
+        # an older DDEV (22) or a project set to an older Node.js gets a warning, and the install goes on.
+        node_major="$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null)"
+        case "${node_major}" in ''|*[!0-9]*) node_major=0 ;; esac
+        if [ "${node_major}" -lt 24 ]; then
+          echo "webship-js wants Node.js 24 or later; this web container runs Node.js $(node --version 2>/dev/null || echo none)." >&2
+          echo "Switch with: ddev config --nodejs-version=24 && ddev restart" >&2
+        fi
         if [ ! -d node_modules/webship-js ]; then
           npm install --no-save webship-js
         fi

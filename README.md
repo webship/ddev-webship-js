@@ -4,6 +4,10 @@
 
 This add-on integrates [Webship-JS](https://webship.co/docs/webship-js/2.0.x) — a Playwright + Cucumber-JS Automated Functional Acceptance Testing framework — into your [DDEV](https://ddev.com/) project. Write and run automated browser tests using Gherkin `.feature` files directly inside your DDEV environment.
 
+## Requirements
+
+- Node.js 24 or later in the web container: webship-js is tested on 24 and 26, the LTS releases. DDEV 1.25 and later start a project on Node.js 24. On an older DDEV, or for a project set to an older Node.js, switch with `ddev config --nodejs-version=24 && ddev restart`; until then the add-on warns on each start.
+
 ## Installation
 
 ```bash
